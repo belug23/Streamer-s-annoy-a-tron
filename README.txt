@@ -11,9 +11,10 @@ file, one user per line, and let them play annoying sounds at him.
 ===
 To add sounds:
 ===
- 1. Add the sound files in the sound folder
- 2. Rename the file to `command.ext` where command is the name of the command you want the viewers to see and ext is the extensio of the file
- 3. Reload the script in Chatbot
+ 1. Remove the placeholder in the sound folder.
+ 2. Add the sound files in the sound folder
+ 3. Rename the file to `command.ext` where command is the name of the command you want the viewers to see and ext is the extensio of the file
+ 4. Reload the script in Chatbot
 
 Exemple:
 ---
