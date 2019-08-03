@@ -1,0 +1,115 @@
+{
+    "output_file": "config.json",
+
+    "liveOnly": {
+        "type": "checkbox",
+        "value": true,
+        "label": "Live Only Mode",
+        "tooltip": "True if you want it to only run when you are live",
+        "group" : "General"
+    },
+    "helpCommand": {
+        "type": "textbox",
+        "value": "!AnnoyMe",
+        "label": "Help command",
+        "tooltip": "List the conditions or the list of sound commands",
+        "group": "General"
+    },
+    "permission": {
+        "type": "dropdown",
+        "value": "Everyone",
+        "items": ["Everyone","Regular","Subscriber","Moderator","Editor"],
+        "label": "Help permission",
+        "tooltip": "Set the permission level for the help command",
+        "group": "General"
+    },
+    "soundPermission": {
+        "type": "dropdown",
+        "value": "Regular",
+        "items": ["Everyone","Regular","Subscriber","Moderator","Editor"],
+        "label": "Play sound permission",
+        "tooltip": "Set the permission level for the sound commands",
+        "group": "General"
+    },
+    "volume": {
+        "type": "slider",
+        "value": 50.0,
+        "min": 1,
+        "max": 100,
+        "ticks": 1.0,
+        "label": "Volume",
+        "tooltip": "Set the volume power for the playing sounds.",
+        "group": "General"
+    },
+    "useCooldown": {
+        "type": "checkbox",
+        "value": true,
+        "label": "Use Cooldown",
+        "tooltip": "Enable/Disable cooldown and user cooldown",
+        "group": "Cooldown"
+    },
+    "useCooldownMessages": {
+        "type": "checkbox",
+        "value": true,
+        "label": "Use Cooldown Messages",
+        "tooltip": "Enable/Disable cooldown messages",
+        "group": "Cooldown"
+    },
+    "cooldown": {
+        "type": "numberbox",
+        "label": "Cooldown (seconds)",
+        "value": 60,
+        "tooltip": "Cooldown in seconds.",
+        "group": "Cooldown"
+    },
+    "onCooldown": {
+        "type": "textbox",
+        "value": "{user}, {command} is still on cooldown for {cd} minutes!",
+        "label": "Cooldown Response",
+        "tooltip": "The message that the bot will display when the command is on cooldown. \r\n {user} = Username\r\n {cd} = time remaining",
+        "group": "Cooldown"
+    },
+    "userCooldown": {
+        "type": "numberbox",
+        "label": "User Cooldown (seconds)",
+        "value": 180,
+        "tooltip": "User cooldown in seconds.",
+        "group": "Cooldown"
+    },
+    "onUserCooldown": {
+        "type": "textbox",
+        "value": "{user}, {command} is still on user cooldown for {cd} minutes!",
+        "label": "User Cooldown Response",
+        "tooltip": "The message that the bot will display when the command is on user cooldown. \r\n {user} = Username\r\n {cd} = time remaining",
+        "group": "Cooldown"
+    },
+    "commandsSeparator": {
+        "type": "textbox",
+        "value": ", ",
+        "label": "Sound commands Separator",
+        "tooltip": "The separator that will be used for the {avail_sound_commands} parameter. \r\n Ex.1 with ' - ': !kids - !boo \r\n Ex.2 with ', ' : !kids, !boo",
+        "group": "Response Messages"
+    },
+    "permitedResponse": {
+        "type": "textbox",
+        "value": "Available sound commands: {avail_sound_commands}",
+        "label": "Playlist",
+        "tooltip": "Message that shows all available sound commands.",
+        "group": "Response Messages"
+    },
+    "notPermitedResponse": {
+        "type": "textbox",
+        "value": "To annoy the streamer you must be a member of his patreon : https://www.patreon.com/",
+        "label": "Playlist",
+        "tooltip": "Message that shows the conditions that you must fill to use the sound commands",
+        "group": "Response Messages"
+    },
+    "openReadMe": {
+        "type": "button",
+        "label": "Open 'Readme Me' file",
+        "tooltip": "Opens the 'Readme.txt' for this script.",
+        "function": "OpenReadMe",
+        "wsevent": "",
+        "group": ""
+    }
+}
