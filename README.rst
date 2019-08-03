@@ -2,7 +2,7 @@
  Name: 		Streamer's Annoy-A-Tron for Streamlabs Chatbot
  Version: 	0.0.0b1
  Creator: 	Belug
- Website:	https://github.com/belug/
+ Website:	https://github.com/belug23/Streamer-s-annoy-a-tron
 ===============================================================================
 
 This allow the streamer to select some viewers by adding them in the `users.txt`

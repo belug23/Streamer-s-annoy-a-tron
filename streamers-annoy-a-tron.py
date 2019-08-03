@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 ScriptName = "Streamer's Annoy-A-Tron"
-Website = ""
+Website = "https://github.com/belug23/Streamer-s-annoy-a-tron"
 Description = "Allow permited viewers to play a list of sounds."
 Creator = "Belug"
 Version = "0.0.0b1"
