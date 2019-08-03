@@ -2,14 +2,13 @@ import codecs
 import ctypes
 import json
 import os
-import subprocess
 import sys
 
 ScriptName = "Streamer's Annoy-A-Tron"
 Website = "https://github.com/belug23/Streamer-s-annoy-a-tron"
 Description = "Allow permited viewers to play a list of sounds."
 Creator = "Belug"
-Version = "0.0.0b1"
+Version = "1.0.0RC1"
 
 
 class ChadBot(object):
@@ -21,8 +20,10 @@ class ChadBot(object):
     """
     config_file = "config.json"
 
-    def __init__(self, parent):
-        self.user_file = "user.txt"
+    def __init__(self):
+        self.base_path = os.path.dirname(__file__)
+        self.user_file = "users.txt"
+        self.user_file_path = os.path.join(self.base_path, self.user_file)
         self.settings = {}
         self.allowedUsers = []
         self.commands = []
@@ -30,12 +31,16 @@ class ChadBot(object):
         self.sounds_path = ""
         self.sounds_db = {}
         self.avail_sound_commands = ""
+        self.parent = None
+
+    def setParent(self, parent):
         self.parent = parent
 
     def setConfigs(self):
+        self.loadSettings()
+
         # Set the sound folder
-        path = os.path.dirname(__file__)
-        self.sounds_path = os.path.join(path, "sounds")
+        self.sounds_path = os.path.join(self.base_path, "sounds")
 
         # Set the true volume for streamlabs Chatbot
         self.volume = self.settings["volume"] / 1000.0
@@ -51,8 +56,8 @@ class ChadBot(object):
             self.commands.append(sound_command) 
             self.sounds_db[sound_command] = sound
         
-        with open('users.txt') as user_list:
-            self.allowedUsers = [user.lower() for user in user_list]
+        with open(self.user_file_path) as user_list:
+            self.allowedUsers = [user.lower().strip('\n') for user in user_list]
 
         # Set the text message to list all the sounds
         self.avail_sound_commands = self.settings["commandsSeparator"].join(self.commands)
@@ -63,9 +68,9 @@ class ChadBot(object):
             If not present, set the settings to some default values
         """
         try:
-            with codecs.open(os.path.join(path, self.config_file), encoding='utf-8-sig', mode='r') as file:
+            with codecs.open(os.path.join(self.base_path, self.config_file), encoding='utf-8-sig', mode='r') as file:
                 self.settings = json.load(file, encoding='utf-8-sig')
-        except:
+        except Exception:
             self.settings = {
                 "liveOnly": True,
                 "helpCommand": "!AnnoyMe",
@@ -96,7 +101,7 @@ class ChadBot(object):
         # If it's from chat and the live setting correspond to the live status
         if self.canParseData(data):
             # If it's the defined help command
-            if data.GetParam(0).lower() == self.settings["helpCommand"]:
+            if data.GetParam(0).lower() == self.settings["helpCommand"].lower():
                 return self.helpMessage(data)
             # Else if it's one of the sound commands
             elif data.GetParam(0).lower() in self.commands:
@@ -112,23 +117,21 @@ class ChadBot(object):
             )
         )
     
-    def isOnCoolDown(self, data):
+    def isOnCoolDown(self, data, command):
         if (
             self.settings["useCooldown"] and
-            (
-                self.parent.IsOnCooldown(ScriptName, self.settings["helpCommand"]) or
-                self.parent.IsOnUserCooldown(ScriptName, self.settings["helpCommand"], data.User)
-            )
+            (self.parent.IsOnCooldown(ScriptName, command) or
+            self.parent.IsOnUserCooldown(ScriptName, command, data.User))
         ):
-            self.sendOnCoolDownMessage(data)
+            self.sendOnCoolDownMessage(data, command)
             return True
         else:
             return False
     
-    def sendOnCoolDownMessage(self, data):
+    def sendOnCoolDownMessage(self, data, command):
         if self.settings["useCooldownMessages"]:
-            commandCoolDownDuration = self.parent.GetCooldownDuration(ScriptName, self.settings["command"])
-            userCoolDownDuration = self.parent.GetUserCooldownDuration(ScriptName, self.settings["command"], data.User)
+            commandCoolDownDuration = self.parent.GetCooldownDuration(ScriptName, command)
+            userCoolDownDuration = self.parent.GetUserCooldownDuration(ScriptName, command, data.User)
 
             if commandCoolDownDuration > userCoolDownDuration:
                 cdi = commandCoolDownDuration
@@ -138,36 +141,46 @@ class ChadBot(object):
                 message = self.settings["onUserCooldown"]
             
             cd = str(cdi / 60) + ":" + str(cdi % 60).zfill(2) 
-            self.sendMessage(data, message, cd=cd)
+            self.sendMessage(data, message, command=command, cd=cd)
         
 
     def helpMessage(self, data):
+
         # If it's still on cool down
-        if not self.isOnCoolDown(data) and self.parent.HasPermission(data.User, self.settings["permission"], ""):
-            if data.UserName in self.allowedUsers:
+        if not self.isOnCoolDown(data, self.settings["helpCommand"]) and self.parent.HasPermission(data.User, self.settings["permission"], ""):
+            if data.UserName.lower() in self.allowedUsers:
                 self.sendMessage(data, self.settings["permitedResponse"])
             else:
                 self.sendMessage(data, self.settings["notPermitedResponse"])
+            
+            self.setCoolDown(data, self.settings["helpCommand"])
     
     def playAnnoyingSound(self, data):
-       
-        if (not self.isOnCoolDown(data) and
-                self.parent.HasPermission(data.User, self.settings["permission"], "") and
+        sound = data.GetParam(0).lower()
+        if (not self.isOnCoolDown(data, sound) and
+                self.parent.HasPermission(data.User, self.settings["soundPermission"], "") and
                 data.UserName.lower() in self.allowedUsers):
-            sound = data.GetParam(1).lower()
+
             if sound in self.sounds_db:
                 soundpath = os.path.join(self.sounds_path, self.sounds_db[sound])
                 if self.parent.PlaySound(soundpath, self.volume):
-                    if self.settings["useCooldown"]:
-                        self.parent.AddUserCooldown(ScriptName, self.settings["command"], data.User, self.settings["userCooldown"])
-                        self.parent.AddCooldown(ScriptName, self.settings["command"], self.settings["cooldown"])
+                    self.setCoolDown(data, sound)
 
-    def sendMessage(self, data, message, cd="0"):
+    def setCoolDown(self, data, command):
+        if self.settings["useCooldown"]:
+            self.parent.AddUserCooldown(ScriptName, command, data.User, self.settings["userCooldown"])
+            self.parent.AddCooldown(ScriptName, command, self.settings["cooldown"])
+
+
+    def sendMessage(self, data, message, command=None, cd="0"):
+        if command is None:
+            command = self.settings["helpCommand"]
+
         outputMessage = message.format(
             user=data.UserName,
             cost=str(None),  # not used
             currency=self.parent.GetCurrencyName(),
-            helpCommand=self.settings["helpCommand"],
+            command=command,
             avail_sound_commands=self.avail_sound_commands,
             cd=cd
         )
@@ -184,17 +197,19 @@ class ChadBot(object):
         if sys.platform == "win32":
             os.startfile(location)  # noqa windows only
         else:
+            import subprocess
             opener ="open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, location])
         return
 
 
-chad_bot = ChadBot(Parent)  # noqa defined by streamlabs chatbot
+chad_bot = ChadBot()
 # Ugly StreamLab part, just map functions to the class
 def ScriptToggled(state):
     return chad_bot.scriptToggled(state)
 
 def Init():
+    chad_bot.setParent(Parent)  # noqa defined by streamlabs chatbot
     return chad_bot.setConfigs()
 
 def Execute(data):

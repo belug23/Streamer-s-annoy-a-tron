@@ -1,6 +1,6 @@
 ===============================================================================
  Name: 		Streamer's Annoy-A-Tron for Streamlabs Chatbot
- Version: 	0.0.0b1
+ Version: 	1.0.0RC1
  Creator: 	Belug
  Website:	https://github.com/belug23/Streamer-s-annoy-a-tron
 ===============================================================================
