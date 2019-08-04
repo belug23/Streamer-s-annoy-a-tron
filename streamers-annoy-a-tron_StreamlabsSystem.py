@@ -43,7 +43,7 @@ class ChadBot(object):
         self.sounds_path = os.path.join(self.base_path, "sounds")
 
         # Set the true volume for streamlabs Chatbot
-        self.volume = self.settings["volume"] / 1000.0
+        self.volume = self.settings["volume"] / 100.0
 
         # Load sounds from the folder
         sounds = os.listdir(self.sounds_path)	
